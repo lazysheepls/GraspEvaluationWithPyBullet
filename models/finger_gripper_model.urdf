@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<robot name="gripper">
+    <material name="blue">
+        <color rgba="0.0 0.0 1.0 1.0"/>
+    </material>
+    <material name="black">
+        <color rgba="0.0 0.0 0.0 1.0"/>
+    </material>
+    <material name="white">
+        <color rgba="1.0 1.0 1.0 1.0"/>
+    </material>
+
+    <link name="world"/>
+    <link name="base_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.168 0.032 0.071"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 1.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <box size="0.168 0.032 0.071"/>
+            </geometry>
+            <material name="white"/>
+        </collision>
+    </link>
+
+    <link name="left_gripper_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 1.57 1.57"/>
+            <geometry>
+                <mesh filename="finger_tip.stl"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <mesh filename="finger_tip.stl"/>
+            </geometry>
+            <material name="white"/>
+        </collision>
+    </link>
+
+    <link name="right_gripper_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 1.57 -1.57"/>
+            <geometry>
+                <mesh filename="finger_tip.stl"/>
+            </geometry>
+            <material name="white"/>
+        </visual>
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 1.57 -1.57"/>
+            <geometry>
+                <mesh filename="finger_tip.stl"/>
+            </geometry>
+            <material name="white"/>
+        </collision>
+    </link>
+
+    <joint name="base_joint" type="prismatic">
+        <origin xyz="0.0 0.0 0.1" rpy="0.0 0.0 0.0"/>
+        <parent link="world"/>
+        <child link="base_link"/>
+        <axis xyz="0.0 0.0 1.0"/>
+        <limit lower="-0.3" upper="0.3" effort="100.0" velocity="1.0"/>
+    </joint>
+
+    <joint name="left_gripper_base_joint" type="prismatic">
+        <origin xyz="-0.054 0.0 -0.0555" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="left_gripper_link"/>
+        <axis xyz="1.0 0.0 0.0"/>
+        <limit lower="0.0" upper="0.039" effort="100.0" velocity="1.0"/>
+    </joint>
+
+    <joint name="right_gripper_base_joint" type="prismatic">
+        <origin xyz="0.054 0.0 -0.0555" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="right_gripper_link"/>
+        <axis xyz="1.0 0.0 0.0"/>
+        <limit lower="-0.039" upper="0.0" effort="100.0" velocity="1.0"/>
+    </joint>
+</robot>

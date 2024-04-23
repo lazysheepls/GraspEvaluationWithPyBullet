@@ -42,7 +42,8 @@ p.setGravity(0,0,-9.81)
 planeId = p.loadURDF("plane.urdf")
 
 # Load gripper model
-gripperId = p.loadURDF("./models/base_gripper_model.urdf")
+# Option: ./models/finger_gripper_model.urdf
+gripperId = p.loadURDF("./models/finger_gripper_model.urdf") # FIXME: STL finger cannot grasp cube
 baseJointIndex = 0
 leftGripperBaseJointIndex = 1
 rightGripperBaseJointIndex = 2
@@ -68,6 +69,8 @@ boxVisualShapeId = p.createVisualShape(shapeType=p.GEOM_BOX, halfExtents=halfExt
 boxStartPos = [0, 0, 0.0]
 boxStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
 
+# Option: Cubic
+
 # Create a multi-body object with the box collision and visual shapes
 # graspObjectId = p.createMultiBody(baseMass=1, baseInertialFramePosition=[0, 0, 0],
 #                           baseCollisionShapeIndex=boxCollisionShapeId,
@@ -75,10 +78,12 @@ boxStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
 #                           basePosition=boxStartPos,
 #                           baseOrientation=boxStartOrientation)
 
-#random_urdfs/012/012.urdf
+# Option: random_urdfs/012/012.urdf
 
 graspObjectId = p.loadURDF("random_urdfs/012/012.urdf", basePosition=[0,0.02,0.0], baseOrientation=[0,0,0,1])
-wait(500) # wait steady
+
+# Wait until object is steady
+wait(500)
 
 # Get grasp object bounding box
 graspObjectMinXYZ, graspObjectMaxXYZ = p.getAABB(graspObjectId)
@@ -104,6 +109,10 @@ while True:
                                         bodyB=planeId, 
                                         linkIndexB=-1)
     
+    gripperToFloorContactPoints = p.getClosestPoints(bodyA=gripperId, 
+                                                     bodyB=planeId,
+                                                     distance = 0.001)
+    
     # Check: gripper body touches the grasp object
     baseLinkToGraspObjContactPoints = p.getClosestPoints(bodyA=gripperId, 
                                                          bodyB=graspObjectId,
@@ -112,7 +121,7 @@ while True:
     # Action: move to floor
     targetVelocity = -0.02
     maxForce = 500
-    if gripperToFloorContactPoints or baseLinkToGraspObjContactPoints: # Stop
+    if gripperToFloorContactPoints or gripperToFloorContactPoints or baseLinkToGraspObjContactPoints: # Stop
         p.setJointMotorControl2(gripperId, 
                         baseJointIndex, 
                         p.VELOCITY_CONTROL, 
@@ -200,19 +209,19 @@ while True:
 # Validation: Graspable
 wait(400) # Wait steady
 
-# Check: gripper touches the box to grasp
-left_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=leftGripperBaseJointIndex, bodyB=graspObjectId, linkIndexB=-1)
-right_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=rightGripperBaseJointIndex, bodyB=graspObjectId, linkIndexB=-1)
-
-if left_gripper_contact_points and right_gripper_contact_points:
-    update_floor_label(debugLabelId, "Grasp success!", COLOR_GREEN)
-else:
-    update_floor_label(debugLabelId, "Grasp failed!", COLOR_RED)
-
-
 # The end
 while True:
     # Step the simulation
     p.stepSimulation()
+
+    # Check: gripper touches the box to grasp
+    left_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=leftGripperBaseJointIndex, bodyB=graspObjectId, linkIndexB=-1)
+    right_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=rightGripperBaseJointIndex, bodyB=graspObjectId, linkIndexB=-1)
+
+    if left_gripper_contact_points and right_gripper_contact_points:
+        update_floor_label(debugLabelId, "Grasp success!", COLOR_GREEN)
+    else:
+        update_floor_label(debugLabelId, "Grasp failed!", COLOR_RED)
+
     # Wait for a short time
     time.sleep(1./240.)
