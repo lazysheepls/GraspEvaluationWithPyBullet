@@ -42,7 +42,7 @@ p.setGravity(0,0,-9.81)
 planeId = p.loadURDF("plane.urdf")
 
 # Load gripper model
-gripperId = p.loadURDF("../urdf_scara_robot/gripper.urdf") #FIXME: cannot load urdf from local folder
+gripperId = p.loadURDF("./models/base_gripper_model.urdf")
 baseJointIndex = 0
 leftGripperBaseJointIndex = 1
 rightGripperBaseJointIndex = 2
