@@ -69,12 +69,23 @@ boxStartPos = [0, 0, 0.0]
 boxStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
 
 # Create a multi-body object with the box collision and visual shapes
-boxId = p.createMultiBody(baseMass=1, baseInertialFramePosition=[0, 0, 0],
-                          baseCollisionShapeIndex=boxCollisionShapeId,
-                          baseVisualShapeIndex=boxVisualShapeId,
-                          basePosition=boxStartPos,
-                          baseOrientation=boxStartOrientation)
+# graspObjectId = p.createMultiBody(baseMass=1, baseInertialFramePosition=[0, 0, 0],
+#                           baseCollisionShapeIndex=boxCollisionShapeId,
+#                           baseVisualShapeIndex=boxVisualShapeId,
+#                           basePosition=boxStartPos,
+#                           baseOrientation=boxStartOrientation)
 
+#random_urdfs/012/012.urdf
+
+graspObjectId = p.loadURDF("random_urdfs/012/012.urdf", basePosition=[0,0.02,0.0], baseOrientation=[0,0,0,1])
+wait(500) # wait steady
+
+# Get grasp object bounding box
+graspObjectMinXYZ, graspObjectMaxXYZ = p.getAABB(graspObjectId)
+print("minXYZ", graspObjectMinXYZ, "maxXYZ", graspObjectMaxXYZ)
+
+# Set the initial height of the "base_link" joint based on the max Z position
+p.resetJointState(gripperId, baseJointIndex, graspObjectMaxXYZ[2])
 
 
 # Simulation: Lower the gripper to the floor
@@ -88,15 +99,20 @@ while True:
     print("base:",baseJointPos)
     
     # Check: gripper touches the floor
-    contact_points = p.getContactPoints(bodyA=gripperId, 
+    gripperToFloorContactPoints = p.getContactPoints(bodyA=gripperId, 
                                         linkIndexA=leftGripperBaseJointIndex, 
                                         bodyB=planeId, 
                                         linkIndexB=-1)
     
+    # Check: gripper body touches the grasp object
+    baseLinkToGraspObjContactPoints = p.getClosestPoints(bodyA=gripperId, 
+                                                         bodyB=graspObjectId,
+                                                         distance = 0.001)
+    
     # Action: move to floor
     targetVelocity = -0.02
     maxForce = 500
-    if contact_points: # Stop
+    if gripperToFloorContactPoints or baseLinkToGraspObjContactPoints: # Stop
         p.setJointMotorControl2(gripperId, 
                         baseJointIndex, 
                         p.VELOCITY_CONTROL, 
@@ -125,8 +141,8 @@ while True:
     print("left:",leftGripperJointPos,"right:",rightGripperJointPos)
 
     # Check: gripper touches the box to grasp
-    left_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=leftGripperBaseJointIndex, bodyB=boxId, linkIndexB=-1)
-    right_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=rightGripperBaseJointIndex, bodyB=boxId, linkIndexB=-1)
+    left_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=leftGripperBaseJointIndex, bodyB=graspObjectId, linkIndexB=-1)
+    right_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=rightGripperBaseJointIndex, bodyB=graspObjectId, linkIndexB=-1)
 
     # Action: move to floor
     taregetPosition = 0.04
@@ -161,7 +177,7 @@ while True:
     print("base:",baseJointPos)
     
     # Action: move to height
-    targetPos = -0.00001
+    targetPos = graspObjectMaxXYZ[2]
     targetVelocity = 0.02
     maxForce = 500
     if baseJointPos >= targetPos: # Stop
@@ -185,8 +201,8 @@ while True:
 wait(400) # Wait steady
 
 # Check: gripper touches the box to grasp
-left_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=leftGripperBaseJointIndex, bodyB=boxId, linkIndexB=-1)
-right_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=rightGripperBaseJointIndex, bodyB=boxId, linkIndexB=-1)
+left_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=leftGripperBaseJointIndex, bodyB=graspObjectId, linkIndexB=-1)
+right_gripper_contact_points = p.getContactPoints(bodyA=gripperId,linkIndexA=rightGripperBaseJointIndex, bodyB=graspObjectId, linkIndexB=-1)
 
 if left_gripper_contact_points and right_gripper_contact_points:
     update_floor_label(debugLabelId, "Grasp success!", COLOR_GREEN)
