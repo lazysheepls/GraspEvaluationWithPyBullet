@@ -21,3 +21,7 @@ Gripper grasp evaluation with PyBullet.
 #### Grsp random object 012
 
 ![Finger model grasp a random object #012 from the floor](GIFs/finger_model_grasp_rand_012.gif)
+
+#### Grsp rubber duck
+
+![Finger model grasp rubber duck from the floor](GIFs/finger_model_grasp_duck.gif)

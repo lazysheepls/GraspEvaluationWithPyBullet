@@ -43,7 +43,7 @@ planeId = p.loadURDF("plane.urdf")
 
 # Load gripper model
 # Option: ./models/finger_gripper_model.urdf
-gripperId = p.loadURDF("./models/finger_gripper_model.urdf") # FIXME: STL finger cannot grasp cube
+gripperId = p.loadURDF("./models/finger_gripper_model.urdf") # FIXME: STL finger cannot grasp cube/rubber duck
 baseJointIndex = 0
 leftGripperBaseJointIndex = 1
 rightGripperBaseJointIndex = 2
@@ -79,11 +79,11 @@ boxStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
 #                           baseOrientation=boxStartOrientation)
 
 # Option: random_urdfs/012/012.urdf
-
+# Option: duck_vhacd.urdf
 graspObjectId = p.loadURDF("random_urdfs/012/012.urdf", basePosition=[0,0.02,0.0], baseOrientation=[0,0,0,1])
 
 # Wait until object is steady
-wait(500)
+wait(700)
 
 # Get grasp object bounding box
 graspObjectMinXYZ, graspObjectMaxXYZ = p.getAABB(graspObjectId)
@@ -104,10 +104,10 @@ while True:
     print("base:",baseJointPos)
     
     # Check: gripper touches the floor
-    gripperToFloorContactPoints = p.getContactPoints(bodyA=gripperId, 
-                                        linkIndexA=leftGripperBaseJointIndex, 
-                                        bodyB=planeId, 
-                                        linkIndexB=-1)
+    # gripperToFloorContactPoints = p.getContactPoints(bodyA=gripperId, 
+    #                                     linkIndexA=leftGripperBaseJointIndex, 
+    #                                     bodyB=planeId, 
+    #                                     linkIndexB=-1)
     
     gripperToFloorContactPoints = p.getClosestPoints(bodyA=gripperId, 
                                                      bodyB=planeId,
@@ -121,7 +121,7 @@ while True:
     # Action: move to floor
     targetVelocity = -0.02
     maxForce = 500
-    if gripperToFloorContactPoints or gripperToFloorContactPoints or baseLinkToGraspObjContactPoints: # Stop
+    if gripperToFloorContactPoints or baseLinkToGraspObjContactPoints: # Stop
         p.setJointMotorControl2(gripperId, 
                         baseJointIndex, 
                         p.VELOCITY_CONTROL, 
