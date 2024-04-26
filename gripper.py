@@ -7,6 +7,8 @@ TEXT_SIZE = 0.08
 COLOR_RED = [255,0,0]
 COLOR_GREEN = [0,255,0]
 COLOR_BLUE = [0,0,255]
+BULLET_LINK_COLOR_RED = [1, 0, 0, 1]
+BULLET_LINK_COLOR_BLUE = [0, 0, 1, 1]
 
 def zoom_in_to_object(object_id, distance=1.0, pitch=-45, yaw=0):
     # Get the position of the target object
@@ -43,7 +45,7 @@ planeId = p.loadURDF("plane.urdf")
 
 # Load gripper model
 # Option: ./models/finger_gripper_model.urdf
-gripperId = p.loadURDF("./models/finger_gripper_model.urdf") # FIXME: STL finger cannot grasp cube/rubber duck
+gripperId = p.loadURDF("./models/finger_gripper_model.urdf")
 baseJointIndex = 0
 leftGripperBaseJointIndex = 1
 rightGripperBaseJointIndex = 2
@@ -61,9 +63,9 @@ debugLabelId = p.addUserDebugText(text="Base model",
 
 # Create object to grasp
 # Create a collision and visual shape for the box
-halfExtents = [0.01, 0.01, 0.01]
+halfExtents = [0.02, 0.02, 0.02]
 boxCollisionShapeId = p.createCollisionShape(shapeType=p.GEOM_BOX, halfExtents=halfExtents)
-boxVisualShapeId = p.createVisualShape(shapeType=p.GEOM_BOX, halfExtents=halfExtents)
+boxVisualShapeId = p.createVisualShape(shapeType=p.GEOM_BOX, halfExtents=halfExtents, rgbaColor = BULLET_LINK_COLOR_BLUE)
 
 # Define the starting position and orientation of the box
 boxStartPos = [0, 0, 0.0]
@@ -72,7 +74,7 @@ boxStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
 # Option: Cubic
 
 # Create a multi-body object with the box collision and visual shapes
-# graspObjectId = p.createMultiBody(baseMass=1, baseInertialFramePosition=[0, 0, 0],
+# graspObjectId = p.createMultiBody(baseMass=1, baseInertialFramePosition=[0, 0.0, 0],
 #                           baseCollisionShapeIndex=boxCollisionShapeId,
 #                           baseVisualShapeIndex=boxVisualShapeId,
 #                           basePosition=boxStartPos,
